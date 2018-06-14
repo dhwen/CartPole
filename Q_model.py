@@ -9,16 +9,20 @@ class QModel:
 
     def build_layers(self,dropout_keep_prob):
         self.state = tf.placeholder(dtype="float32", shape=(None, 4), name="State")
-        self.fc1 = tf.layers.dense(self.state, 4, name="FC1")
+        self.fc1 = tf.layers.dense(self.state, 5, name="FC1")
         self.bn1 = tf.layers.batch_normalization(self.fc1, name="BN1")
         self.relu1 = tf.nn.relu(self.bn1, name='Relu1')
         self.dropout1 = tf.nn.dropout(self.relu1, keep_prob=dropout_keep_prob, name='DropOut1')
-        self.fc2 = tf.layers.dense(self.dropout1, 3, name="FC2")
+        self.fc2 = tf.layers.dense(self.dropout1, 4, name="FC2")
         self.bn2 = tf.layers.batch_normalization(self.fc2, name="BN2")
         self.relu2 = tf.nn.relu(self.bn2, name='Relu2')
         self.dropout2 = tf.nn.dropout(self.relu2, keep_prob=dropout_keep_prob, name='DropOut2')
-        self.fc3 = tf.layers.dense(self.dropout2, 2, name="FC3")
-        self.output = tf.nn.relu(self.fc3, name='Output')
+        self.fc3 = tf.layers.dense(self.dropout2, 4, name="FC3")
+        self.bn3 = tf.layers.batch_normalization(self.fc3, name="BN3")
+        self.relu3 = tf.nn.relu(self.bn2, name='Relu3')
+        self.dropout3 = tf.nn.dropout(self.relu3, keep_prob=dropout_keep_prob, name='DropOut3')
+        self.fc4 = tf.layers.dense(self.dropout3, 2, name="FC4")
+        self.output = tf.nn.relu(self.fc4, name='Output')
 
     def build_backprop(self):
         self.action_taken = tf.placeholder(dtype="float32", shape=(None, 1), name="ActionTaken")
