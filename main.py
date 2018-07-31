@@ -23,8 +23,8 @@ def run_episode(model, env, replay_buffer, cumulative_steps, epsilon):
         observation_new, reward, done, info = env.step(action)
 
         action_values_new = sess.run([model.output], feed_dict={model.state: [observation_new]})
-        #surprisal = np.exp(1/10*np.abs(reward + np.max(action_values_new) - action_values[0][0][action]))
-        surprisal = 1
+        surprisal = np.exp(1/10*np.abs(reward + np.max(action_values_new) - action_values[0][0][action]))
+        #surprisal = 1
 
         replay_buffer[len(replay_buffer) % 10000] = [observation, action, reward, observation_new, int(done == False), surprisal]
         time = time + 1
@@ -52,8 +52,8 @@ def update_model(model, replay_buffer):
 
     rewards = np.expand_dims(cur_rewards + discount_factor*np.amax(actions_values_new,axis=1)*ongoing, axis=1)
 
-    for i in range(1000):
-        out, loss_val = sess.run([model.opt, model.loss], feed_dict={model.state: observations, model.action_taken: actions_taken, model.label: rewards})
+    for i in range(5000):
+        out, loss_val = sess.run([model.opt, model.loss], feed_dict={model.state: observations, model.action_taken: actions_taken, model.label: rewards, model.bIsTrain : True})
     print("MSE is ", loss_val)
 
     actions_values = sess.run(model.output, feed_dict={model.state: observations})
@@ -61,8 +61,8 @@ def update_model(model, replay_buffer):
 
     i = 0
     for random_index in random_indices:
-        #replay_buffer[random_index][5] = np.exp(1/10*np.abs(rewards[i] + np.max(actions_values_new[i]) - actions_values[i][actions_taken[i][0]]))[0]
-        replay_buffer[random_index][5] = 1
+        replay_buffer[random_index][5] = np.exp(1/10*np.abs(rewards[i] + np.max(actions_values_new[i]) - actions_values[i][actions_taken[i][0]]))[0]
+        #replay_buffer[random_index][5] = 1
         i = i + 1
 
 def test(model,env):
@@ -81,7 +81,7 @@ def test(model,env):
 
 #//Main//#
 CartPole_env = gym.make('CartPole-v0')
-Q_model = QModel(dropout_keep_prob=1)
+Q_model = QModel(drop_prob=0)
 
 with tf.Session(graph=Q_model.graph) as sess:
     init = tf.global_variables_initializer()
