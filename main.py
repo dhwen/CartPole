@@ -4,7 +4,7 @@ import numpy as np
 from Q_model import QModel
 
 #//Main//#
-def run_episode(model, env, replay_buffer, cumulative_steps, epsilon):
+def run_episode(model, env, replay_buffer, replay_idx, cumulative_steps, epsilon):
     observation_new = env.reset()
     done = False
     time = 0
@@ -26,7 +26,13 @@ def run_episode(model, env, replay_buffer, cumulative_steps, epsilon):
         surprisal = np.exp(1/10*np.abs(reward + np.max(action_values_new) - action_values[0][0][action]))
         #surprisal = 1
 
-        replay_buffer[len(replay_buffer) % 10000] = [observation, action, reward, observation_new, int(done == False), surprisal]
+        replay_idx = replay_idx % 10000
+
+        if(len(replay_buffer) < 10000):
+            replay_buffer.append([observation, action, reward, observation_new, int(done == False), surprisal])
+        else:
+            replay_buffer[replay_idx] = [observation, action, reward, observation_new, int(done == False), surprisal]
+
         time = time + 1
     return replay_buffer, cumulative_steps+time
 
@@ -37,7 +43,7 @@ def update_model(model, replay_buffer):
     #randomly draw samples from our replay_buffer based on surprisal
     selection_weights = np.array([replay_buffer[x][5] for x in range(len(replay_buffer))])
     selection_weights = selection_weights/sum(selection_weights)
-    random_indices = np.random.choice(a=len(replay_buffer), size=min(sample_count,len(replay_buffer)), replace=False, p=selection_weights)
+    random_indices = np.random.choice(a=len(replay_buffer), size=min(sample_count, len(replay_buffer)), replace=False, p=selection_weights)
 
     #residual learning with cost = (R + discount_factor*Q_old(S',A') - Q_old(S,A))^2
     discount_factor = 0.9
@@ -52,7 +58,7 @@ def update_model(model, replay_buffer):
 
     rewards = np.expand_dims(cur_rewards + discount_factor*np.amax(actions_values_new,axis=1)*ongoing, axis=1)
 
-    for i in range(5000):
+    for i in range(1000):
         out, loss_val = sess.run([model.opt, model.loss], feed_dict={model.state: observations, model.action_taken: actions_taken, model.label: rewards, model.bIsTrain : True})
     print("MSE is ", loss_val)
 
@@ -87,12 +93,13 @@ with tf.Session(graph=Q_model.graph) as sess:
     init = tf.global_variables_initializer()
     sess.run(init)
 
-    replay_buffer = {}
+    replay_buffer = []
+    replay_idx = 0
     for i in range(100):
         cumulative_steps = 0
         print(i)
         for j in range(100):
-            replay_buffer, cumulative_steps = run_episode(Q_model, CartPole_env, replay_buffer, cumulative_steps, 0.1)
+            replay_buffer, cumulative_steps = run_episode(Q_model, CartPole_env, replay_buffer, replay_idx, cumulative_steps, 0.1)
         print("Average of ",cumulative_steps/100," steps taken.")
         update_model(Q_model,replay_buffer)
 
