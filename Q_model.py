@@ -15,11 +15,12 @@ class QModel:
 
     def build_layers(self):
 
-        self.fc1 = self.DenseStack(self.state, 6, 1)
-        self.fc2 = self.DenseStack(self.fc1, 5, 2)
-        self.fc3 = self.DenseStack(self.fc2, 5, 3)
-        self.fc4 = self.DenseStack(self.fc3, 4, 4)
-        self.fc_out = tf.layers.dense(self.fc4, 2, name="FCout")
+        self.fc1 = self.DenseStack(self.state, 8, 1)
+        self.fc2 = self.DenseStack(self.fc1, 7, 2)
+        self.fc3 = self.DenseStack(self.fc2, 6, 3)
+        self.fc4 = self.DenseStack(self.fc3, 6, 4)
+        self.fc5 = self.DenseStack(self.fc4, 5, 5)
+        self.fc_out = tf.layers.dense(self.fc5, 2, name="FCout")
         self.output = tf.nn.relu(self.fc_out, name='Output')
 
     def DenseStack(self, inputs, nNodes, id):
