@@ -5,8 +5,6 @@ class QModel:
         self.graph = tf.Graph()
         with self.graph.as_default():
             self.state = tf.placeholder(dtype=tf.float32, shape=(None, 4), name="State")
-            #self.bIsTrain = tf.placeholder(dtype=tf.bool, shape=(), name="bIsTrain")
-
             self.bIsTrain = tf.placeholder_with_default(False, shape=(), name="bIsTrain")
             self.drop_prob = dropout_drop_prob
 

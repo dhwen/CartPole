@@ -8,9 +8,12 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
+# Ckpt Folders
+model_ckpt/
+
 # Misc Folders
 .idea/
-.__pycache__/
+__pycache__/
 
 # Windows Installer files
 *.cab
