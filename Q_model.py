@@ -1,32 +1,32 @@
 import tensorflow as tf
 
 class QModel:
-    def __init__(self, dropout_drop_prob=0):
+    def __init__(self, input_dims, dropout_drop_prob=0):
         self.graph = tf.Graph()
         with self.graph.as_default():
-            self.state = tf.placeholder(dtype=tf.float32, shape=(None, 4), name="State")
+            self.input = tf.placeholder(dtype=tf.float32, shape=(None, *input_dims), name="Input")
             self.bIsTrain = tf.placeholder_with_default(False, shape=(), name="bIsTrain")
             self.drop_prob = dropout_drop_prob
-
-            self.build_layers()
+            self.build_model()
             self.build_backprop()
 
-    def build_layers(self):
+    def build_model(self):
 
-        self.fc1 = self.DenseStack(self.state, 8, 1)
-        self.fc2 = self.DenseStack(self.fc1, 7, 2)
-        self.fc3 = self.DenseStack(self.fc2, 6, 3)
-        self.fc4 = self.DenseStack(self.fc3, 6, 4)
-        self.fc5 = self.DenseStack(self.fc4, 5, 5)
-        self.fc_out = tf.layers.dense(self.fc5, 2, name="FCout")
-        self.output = tf.nn.relu(self.fc_out, name='Output')
+        fc1 = self.DenseStack(self.input, 8, 1)
+        fc2 = self.DenseStack(fc1, 9, 2)
+        fc3 = self.DenseStack(fc2, 8, 3)
+        fc4 = self.DenseStack(fc3, 7, 4)
+        fc5 = self.DenseStack(fc4, 7, 5)
+        fc6 = self.DenseStack(fc5, 6, 6)
+        fc7 = self.DenseStack(fc6, 2, 7)
+        self.output = tf.nn.relu(fc7, name='Output')
 
     def DenseStack(self, inputs, nNodes, id):
         with tf.variable_scope("DenseStack"+str(id)):
             fc = tf.layers.dense(inputs, nNodes, name="FC")
             bn = tf.layers.batch_normalization(fc, name="BN")
-            relu = tf.nn.relu(bn, name='Relu')
-            dropout = tf.layers.dropout(relu, rate=self.drop_prob, training=self.bIsTrain, name='DropOut')
+            leaky_relu = tf.nn.leaky_relu(bn, alpha=0.01, name='LeakyRelu')
+            dropout = tf.layers.dropout(leaky_relu, rate=self.drop_prob, training=self.bIsTrain, name='DropOut')
         return dropout
 
     def build_backprop(self):

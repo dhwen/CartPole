@@ -1,0 +1,33 @@
+{
+	"Model": {
+		"PathCKPT": "cartpole_model_ckpt/",
+		"NameCKPT": "cartpole.ckpt",
+		"Type" : "DNN"
+	},
+	
+	"Environment": {
+		"Type": "CartPole-v0",
+		"StateDimensions": [4]		
+	},
+
+	"Train": {
+		"Epochs": {
+			"Main": 50,
+			"Sampling": 100,
+			"Backprop": 1000
+		},
+		"DiscountFactor": 0.9,
+		"Epsilon": 0.1,
+		"DropoutProb": 0,
+		"ReplayBufferSize": 10000,
+		"SampleSize": 2000
+		
+	},
+	
+	"Debug": {
+		"Intervals": {
+			"PrintSteps": 1,
+			"SaveCKPT": 5
+		}
+	}
+ }
