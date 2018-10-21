@@ -15,11 +15,12 @@ class QModel:
         fc1 = self.DenseStack(self.input, 8, 1)
         fc2 = self.DenseStack(fc1, 9, 2)
         fc3 = self.DenseStack(fc2, 8, 3)
-        fc4 = self.DenseStack(fc3, 7, 4)
+        fc4 = self.DenseStack(fc3, 8, 4)
         fc5 = self.DenseStack(fc4, 7, 5)
-        fc6 = self.DenseStack(fc5, 6, 6)
-        fc7 = self.DenseStack(fc6, 2, 7)
-        self.output = tf.nn.relu(fc7, name='Output')
+        fc6 = self.DenseStack(fc5, 7, 6)
+        fc7 = self.DenseStack(fc6, 6, 7)
+        fc8 = self.DenseStack(fc7, 2, 9)
+        self.output = tf.nn.relu(fc8, name='Output')
 
     def DenseStack(self, inputs, nNodes, id):
         with tf.variable_scope("DenseStack"+str(id)):

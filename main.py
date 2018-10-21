@@ -15,8 +15,7 @@ def run_episode(model, env, replay_buffer, replay_idx, cumulative_steps, config)
         observation = observation_new
         action_values = sess.run([model.output], feed_dict={model.input: [observation]})
 
-        explore = np.random.rand(1) < config.epsilon
-        if (explore):
+        if (np.random.rand(1) < config.epsilon):
             action = np.random.randint(2)
         else:
             action = np.argmax(action_values)
@@ -27,7 +26,7 @@ def run_episode(model, env, replay_buffer, replay_idx, cumulative_steps, config)
         surprisal = np.exp(1/10*np.abs(reward + np.max(action_values_new) - action_values[0][0][action]))
         #surprisal = 1
 
-        replay_idx = replay_idx % config.replay_buffer_size
+        replay_idx = (replay_idx + 1) % config.replay_buffer_size
 
         if(len(replay_buffer) < config.replay_buffer_size):
             replay_buffer.append([observation, action, reward, observation_new, int(done == False), surprisal])
@@ -35,7 +34,7 @@ def run_episode(model, env, replay_buffer, replay_idx, cumulative_steps, config)
             replay_buffer[replay_idx] = [observation, action, reward, observation_new, int(done == False), surprisal]
         time = time + 1
 
-    return replay_buffer, cumulative_steps+time
+    return replay_idx, cumulative_steps+time
 
 def update_model(model, replay_buffer, config):
 
@@ -87,8 +86,6 @@ config = ConfigLoader(file_json)
 env = gym.make(config.env_type)
 Q_model = QModel(input_dims = config.env_dims, dropout_drop_prob=config.dropout_prob)
 
-
-
 with tf.Session(graph=Q_model.graph) as sess:
     init = tf.global_variables_initializer()
     sess.run(init)
@@ -98,8 +95,8 @@ with tf.Session(graph=Q_model.graph) as sess:
     for i in range(config.num_epochs_main):
         cumulative_steps = 0
         for _ in range(config.num_epochs_sampling):
-            replay_buffer, cumulative_steps = run_episode(Q_model, env, replay_buffer, replay_idx, cumulative_steps, config)
+            replay_idx, cumulative_steps = run_episode(Q_model, env, replay_buffer, replay_idx, cumulative_steps, config)
         print("Epoch %d, average of %d steps taken" % (i, cumulative_steps/config.num_epochs_sampling))
-        update_model(Q_model,replay_buffer, config)
+        update_model(Q_model, replay_buffer, config)
 
     test(Q_model, env)

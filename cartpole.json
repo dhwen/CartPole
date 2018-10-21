@@ -17,7 +17,7 @@
 			"Backprop": 1000
 		},
 		"DiscountFactor": 0.9,
-		"Epsilon": 0.1,
+		"Epsilon": 0.15,
 		"DropoutProb": 0,
 		"ReplayBufferSize": 10000,
 		"SampleSize": 2000
