@@ -11,7 +11,7 @@
 	},
 
 	"Train": {
-		"Epochs": {
+		"Iterations": {
 			"Main": 50,
 			"Sampling": 100,
 			"Backprop": 1000

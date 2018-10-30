@@ -53,7 +53,7 @@ def update_model(model, replay_buffer, config):
     actions_values_new = sess.run(model.output, feed_dict={model.input: observations_new})
     rewards = np.expand_dims(cur_rewards + config.discount_factor*np.amax(actions_values_new,axis=1)*ongoing, axis=1)
 
-    for _ in range(config.num_epochs_backprop):
+    for _ in range(config.num_iter_backprop):
         out, loss_val = sess.run([model.opt, model.loss], feed_dict={model.input: observations, model.action_taken: actions_taken, model.label: rewards, model.bIsTrain : True})
     print("Final MSE on model update is ", loss_val)
 
@@ -92,11 +92,11 @@ with tf.Session(graph=Q_model.graph) as sess:
 
     replay_buffer = []
     replay_idx = 0
-    for i in range(config.num_epochs_main):
+    for i in range(config.num_iter_main):
         cumulative_steps = 0
-        for _ in range(config.num_epochs_sampling):
+        for _ in range(config.num_iter_sampling):
             replay_idx, cumulative_steps = run_episode(Q_model, env, replay_buffer, replay_idx, cumulative_steps, config)
-        print("Epoch %d, average of %d steps taken" % (i, cumulative_steps/config.num_epochs_sampling))
+        print("Iter %d, average of %d steps taken" % (i, cumulative_steps/config.num_iter_sampling))
         update_model(Q_model, replay_buffer, config)
 
     test(Q_model, env)
