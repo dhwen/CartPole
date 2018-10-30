@@ -96,7 +96,7 @@ with tf.Session(graph=Q_model.graph) as sess:
         cumulative_steps = 0
         for _ in range(config.num_iter_sampling):
             replay_idx, cumulative_steps = run_episode(Q_model, env, replay_buffer, replay_idx, cumulative_steps, config)
-        print("Iter %d, average of %d steps taken" % (i, cumulative_steps/config.num_iter_sampling))
+        print("Iteration %d, average of %d steps taken" % (i, cumulative_steps/config.num_iter_sampling))
         update_model(Q_model, replay_buffer, config)
 
     test(Q_model, env)
